@@ -24,6 +24,44 @@ let firstAlien;
 let yourShip;
 let gameUpdate = [];
 
+class Ship {
+    constructor (hull, firepower, accuracy) {
+        this.hull = hull;
+        this.firepower = firepower;
+        this.accuracy = accuracy;
+    }
+    attack(enemy) {
+        let chance = Math.random();
+        if (chance < this.accuracy) {
+            enemy.hull -= this.firepower;
+            return true;
+        } else if (chance > this.accuracy) {
+            return false;
+        };
+    }
+    retreat() {
+        alert(`Are you sure?`);
+        restart();
+    }
+}
+
+class earthShip extends Ship {
+    constructor () {
+        super(20, 5, .7);
+    }
+}
+
+class alienShip extends Ship {
+    constructor () {
+        super(
+            Math.floor(Math.random() * (6 - 3 + 1)) + 3,
+            Math.floor(Math.random() * (4 - 2 + 1)) + 2,
+            Math.random() * (0.8 - 0.6) + 0.6,
+        )
+    }
+}
+
+// toggle display of menu and interactive buttons
 function displayMenu(show) {
     const display = show ? 'block' : 'none';
     proceedBtn.style.display = display;
@@ -37,6 +75,12 @@ function displayBtns(show) {
     retreatBtn.style.display = display;
 }
 
+function empty(element) {
+    element.textContent = '';
+    element.innerHTML = '';
+}
+
+// 'save the world' button click requires value input to begin game
 startBtn.addEventListener('click', function(event) {
     playerName = prompt("Enter your player name to begin.");
     if (playerName === '') {
@@ -52,13 +96,7 @@ startBtn.addEventListener('click', function(event) {
     }
 })
 
-startOver.addEventListener('click', function(event) {
-    startBtn.style.display = 'block';
-    displayMenu(false);
-    empty(earth);
-    empty(aliens);
-})
-
+// 'prepare for battle' click starts the game; previous player is removed (if any) / player and enemy are created
 proceedBtn.addEventListener('click', function(event) {
     startBtn.style.display = 'none';
     displayMenu(false);
@@ -68,32 +106,16 @@ proceedBtn.addEventListener('click', function(event) {
     empty(player);
     createPlayer();
     createEnemy();
-    console.log(yourShip);
-    console.log(alien);
 })
 
-function empty(element) {
-    element.textContent = '';
-    element.innerHTML = '';
-}
+// 'start over' btn click allows user to enter new player name
+startOver.addEventListener('click', function(event) {
+    startBtn.style.display = 'block';
+    displayMenu(false);
+    empty(earth);
+    empty(aliens);
+})
 
-function updateShipInfo() {
-    let shipHealth = yourShip.hull;
-    let hullColor;
-    if (shipHealth >= 12) {
-        hullColor = 'green';
-    } else if (shipHealth <= 11 && shipHealth >= 6) {
-        hullColor = 'orange';
-    } else if (shipHealth < 6) {
-        hullColor = 'red';
-    }
-    
-    const shipSpan = document.createElement('span');
-    shipSpan.textContent = shipHealth;
-    shipSpan.className = hullColor;
-    shipInfo.textContent = 'Current ship health: ';
-    shipInfo.appendChild(shipSpan);
-}
 
 function createPlayer() {
     yourShip = new earthShip;
@@ -119,28 +141,26 @@ function createEnemy() {
     firstAlien.classList.add('bounce');
 }
 
-class Ship {
-    constructor (hull, firepower, accuracy) {
-        this.hull = hull;
-        this.firepower = firepower;
-        this.accuracy = accuracy;
+// function is called when player is created + with every counterattack
+function updateShipInfo() {
+    let shipHealth = yourShip.hull;
+    let hullColor;
+    if (shipHealth >= 12) {
+        hullColor = 'green';
+    } else if (shipHealth <= 11 && shipHealth >= 6) {
+        hullColor = 'orange';
+    } else if (shipHealth < 6) {
+        hullColor = 'red';
     }
-    attack(enemy) {
-        let chance = Math.random();
-        if (chance < this.accuracy) {
-            enemy.hull -= this.firepower;
-            return true;
-        } else if (chance > this.accuracy) {
-            return false;
-        };
-    }
-    retreat() {
-        alert(`Are you sure?`);
-        restart();
-    }
+    
+    const shipSpan = document.createElement('span');
+    shipSpan.textContent = shipHealth;
+    shipSpan.className = hullColor;
+    shipInfo.textContent = 'Current ship health: ';
+    shipInfo.appendChild(shipSpan);
 }
 
-
+// game progress updates
 function update(text) {
     gameUpdate.push(text);
     const msgEl = document.querySelectorAll('.msg');
@@ -153,6 +173,7 @@ function update(text) {
     });
 }
 
+// reset game prog updates
 function resetMsgs() {
     gameUpdate = [];
     const msgEl = document.querySelectorAll('.msg');
@@ -160,6 +181,21 @@ function resetMsgs() {
         msgEl[i].textContent = '';
     }
 }
+
+// full restart of game
+function restart() {
+    displayMenu(true);
+    intro.style.display = 'block';
+    aliens.classList.remove('slideIn');
+    playerStats.style.display = 'none';
+    displayBtns(false);
+    empty(earth);
+    empty(aliens);
+    empty(player);
+    resetMsgs();
+}
+
+// initiates 'attack' on first alien/alien is removed if hull depleted/alien img blinks if alien injured/counterattack commences if alien exists/if no more aliens, player wins/if player hull depleted, player loses and game restarts
 
 attackBtn.addEventListener('click', function (event) {
     resetMsgs();
@@ -206,36 +242,6 @@ function counterAttack() {
         updateShipInfo();
     } else if (chance > alien [0].accuracy) {
         update(`Alien counterattack unsuccessful; no damage to USS Assembly.`)
-    }
-    console.log(yourShip);
-    console.log(alien);
-}
-
-function restart() {
-    displayMenu(true);
-    intro.style.display = 'block';
-    aliens.classList.remove('slideIn');
-    playerStats.style.display = 'none';
-    displayBtns(false);
-    empty(earth);
-    empty(aliens);
-    empty(player);
-    resetMsgs();
-}
-
-class earthShip extends Ship {
-    constructor () {
-        super(20, 5, .7);
-    }
-}
-
-class alienShip extends Ship {
-    constructor () {
-        super(
-            Math.floor(Math.random() * (6 - 3 + 1)) + 3,
-            Math.floor(Math.random() * (4 - 2 + 1)) + 2,
-            Math.random() * (0.8 - 0.6) + 0.6,
-        )
     }
 }
 
