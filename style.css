@@ -126,6 +126,18 @@ button {
 .msg {
     padding: 10px;
 }
+
+.fadeIn {
+    animation: fadeIn 1s;
+}
+
+@keyframes fadeIn {
+    0% { opacity: 0; }
+    25% { opacity: .25; }
+    50% { opacity: .50; }
+    75% { opacity: .75; }
+    100% { opacity: 1; }
+}
   
 @keyframes bounce {
     0%       { bottom: 1px; }

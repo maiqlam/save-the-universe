@@ -22,29 +22,19 @@ let alienImg;
 let alien = [];
 let firstAlien;
 let yourShip;
+let gameUpdate = [];
 
-// menu display
-function showMenu() {
-    proceedBtn.style.display = 'block';
-    startOver.style.display = 'block';  
-    welcomeMsg.style.display = 'block'; 
+function displayMenu(show) {
+    const display = show ? 'block' : 'none';
+    proceedBtn.style.display = display;
+    startOver.style.display = display;
+    welcomeMsg.style.display = display;
 }
 
-function hideMenu() {
-    proceedBtn.style.display = 'none';
-    startOver.style.display = 'none';
-    welcomeMsg.style.display = 'none';
-}
-
-// game interaction buttons display
-function showBtns() {
-    attackBtn.style.display = 'block';
-    retreatBtn.style.display = 'block';
-}
-
-function hideBtns() {
-    attackBtn.style.display = 'none';
-    retreatBtn.style.display = 'none';
+function displayBtns(show) {
+    const display = show ? 'block' : 'none';
+    attackBtn.style.display = display;
+    retreatBtn.style.display = display;
 }
 
 startBtn.addEventListener('click', function(event) {
@@ -53,28 +43,28 @@ startBtn.addEventListener('click', function(event) {
         alert(`Name cannot be blank. No name, no game!`)
     } 
     if (playerName) {
-        showMenu();
+        displayMenu(true);
         startBtn.style.display = 'none';
         welcomeMsg.innerText = `Welcome, ${playerName}! Are you ready to save the universe?`;
     }
      else {
-        hideMenu();
+        displayMenu(false);
     }
 })
 
 startOver.addEventListener('click', function(event) {
     startBtn.style.display = 'block';
-    hideMenu();
+    displayMenu(false);
     empty(earth);
     empty(aliens);
 })
 
 proceedBtn.addEventListener('click', function(event) {
     startBtn.style.display = 'none';
-    hideMenu();
+    displayMenu(false);
     intro.style.display = 'none';
     playerStats.style.display = 'flex';
-    showBtns();
+    displayBtns(true);
     empty(player);
     createPlayer();
     createEnemy();
@@ -150,7 +140,6 @@ class Ship {
     }
 }
 
-let gameUpdate = [];
 
 function update(text) {
     gameUpdate.push(text);
@@ -158,6 +147,10 @@ function update(text) {
     for (let i = 0; i < msgEl.length; i++) {
         msgEl[i].textContent = gameUpdate[i] || '';
     }
+    gameProg.classList.add('fadeIn');
+    gameProg.addEventListener('animationend', () => {
+        gameProg.classList.remove('fadeIn');
+    });
 }
 
 function resetMsgs() {
@@ -219,11 +212,11 @@ function counterAttack() {
 }
 
 function restart() {
-    showMenu();
+    displayMenu(true);
     intro.style.display = 'block';
     aliens.classList.remove('slideIn');
     playerStats.style.display = 'none';
-    hideBtns();
+    displayBtns(false);
     empty(earth);
     empty(aliens);
     empty(player);
