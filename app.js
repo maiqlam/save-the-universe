@@ -1,4 +1,3 @@
-
 const startBtn = document.getElementById('startBtn');
 const startGame = document.getElementById('startGame');
 const playerStats = document.getElementById('playerStats');
@@ -61,6 +60,8 @@ startBtn.addEventListener('click', function(event) {
 startOver.addEventListener('click', function(event) {
     startBtn.style.display = 'block';
     hideMenu();
+    empty(earth);
+    empty(aliens);
 })
 
 proceedBtn.addEventListener('click', function(event) {
@@ -72,6 +73,8 @@ proceedBtn.addEventListener('click', function(event) {
     empty(player);
     createPlayer();
     createEnemy();
+    console.log(yourShip);
+    console.log(alien);
 })
 
 function empty(element) {
@@ -79,22 +82,37 @@ function empty(element) {
     element.innerHTML = '';
 }
 const player = document.createElement('h4');
+let yourShip;
+function updateShipInfo() {
+    shipInfo.textContent = `Current ship health: ${yourShip.hull}`;
+}
 function createPlayer() {
+    yourShip = new earthShip;
     let shipImg = document.createElement('img');
     shipImg.src = '/earthShip.png';
     earth.append(shipImg);
     player.textContent = `All aboard the USS Assembly with Captain ${playerName} to steer us to victory!`;
     playerInfo.prepend(player);
-    return;
+    updateShipInfo();
 }
 
+let alienImg;
+
+let alien = [];
+let firstAlien;
+
 function createEnemy() {
+    for (let i = 0; i < 6; i++) {
+        alien[i] = new alienShip;
+    }
     for (let i = 0; i < alien.length; i++) {
-        let alienImg = document.createElement('img');
+        alienImg = document.createElement('img');
         alienImg.src = '/alien.png';
         aliens.append(alienImg);
     }
     aliens.classList.add('slideIn');
+    firstAlien = document.querySelector('.aliens img');
+    firstAlien.classList.add('bounce');
 }
 
 class Ship {
@@ -104,10 +122,11 @@ class Ship {
         this.accuracy = accuracy;
     }
     attack(enemy) {
-        if (Math.random() < this.accuracy) {
+        let chance = Math.random();
+        if (chance < this.accuracy) {
             enemy.hull -= this.firepower;
             alert(`Successful attack!`);
-        } else if (Math.random() > this.accuracy) {
+        } else if (chance > this.accuracy) {
             alert(`Target missed.`);
         };
     }
@@ -117,19 +136,52 @@ class Ship {
     }
 }
 
+attackBtn.addEventListener('click', function (event) {
+    firstAlien = document.querySelector('.aliens img');
+    yourShip.attack(alien[0]);
+    if (alien[0].hull <= 0) {
+        alien.shift();
+        if (firstAlien) {
+            firstAlien.remove();
+        }
+    }
+    if (alien[0]) {
+        counterAttack();
+    }
+    if (!alien[0]) {
+        alert(`You have defeated the aliens and saved the universe!`);
+        restart();
+    }
+    if (yourShip.hull <= 0) {
+        alert(`Mission failed. USS Assembly has been defeated and the aliens have taken over the universe.`);
+        restart();
+    }
+})
+
 function counterAttack() {
-    if (Math.random() < alien[0].accuracy) {
+    firstAlien = document.querySelector('.aliens img');
+    firstAlien.classList.add('bounce');
+    let chance = Math.random();
+    if (chance < alien[0].accuracy) {
         alert('Alien counterattack: You have been hit!');
         yourShip.hull -= alien[0].firepower;
-    } else if (Math.random() > alien [0].accuracy) {
+        updateShipInfo();
+    } else if (chance > alien [0].accuracy) {
         alert(`Alien counterattack unsuccessful; no damage to USS Assembly.`)
     }
+    console.log(yourShip);
+    console.log(alien);
 }
 
 function restart() {
     showMenu();
     intro.style.display = 'block';
     aliens.classList.remove('slideIn');
+    playerStats.style.display = 'none';
+    hideBtns();
+    empty(earth);
+    empty(aliens);
+    empty(player);
 }
 
 class earthShip extends Ship {
@@ -148,33 +200,6 @@ class alienShip extends Ship {
     }
 }
 
-let alien = [];
-
-for (let i = 0; i < 6; i++) {
-    alien[i] = new alienShip;
-}
-
-
-let yourShip = new earthShip;
-let health = yourShip.hull;
-shipInfo.textContent = `Current ship health: ${health}`
-attackBtn.addEventListener('click', function (event) {
-    yourShip.attack(alien[0]);
-    if (alien[0].hull <= 0) {
-        alien.shift();
-    }
-    counterAttack();
-    if (yourShip.hull <= 0) {
-        alert(`Mission failed. USS Assembly has been defeated.`)
-    }
-})
-
 retreatBtn.addEventListener('click', function(event) {
     yourShip.retreat();
-    playerStats.style.display = 'none';
-    hideBtns();
-    empty(earth);
-    empty(aliens);
 })
-console.log(yourShip);
-console.log(alien);
