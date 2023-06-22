@@ -49,6 +49,11 @@ button {
     margin: 50px 50px 50px 20px;
 }
 
+#playerStats > p {
+    font-size: 14px;
+    text-align: center;
+}
+
 .playerBtns {
     justify-content: center;
 }
@@ -60,8 +65,9 @@ button {
 #shipInfo {
     font-size: larger;
     padding-top: 2rem;
-    padding-bottom: 1rem;
+    padding-bottom: 3rem;
     text-align: center;
+    font-style: italic;
 }
 
 #playerAttack, #playerRetreat {
@@ -100,23 +106,51 @@ button {
 .earth > img {
     width: 140px;
     padding: 3rem;
-    animation: animate__flash;
 }
-
-/* .healthBar {
-    height: 10px;
-    width: 100%;
-    background-color: green;
-} */
 
 .bounce {
     position:relative;
     animation:bounce 0.55s infinite;
   }
+
+#shipInfo > span {
+    border: 2px solid black;
+    padding: 5px;
+    background-color: white;
+}
+
+#gameProg {
+    text-align: center;
+}
+
+.msg {
+    padding: 10px;
+}
   
 @keyframes bounce {
     0%       { bottom: 1px; }
     25%, 75% { bottom: 3px; }
     50%      { bottom: 5px; }
     100%     { bottom: 0px; }
+  }
+
+  @keyframes blink {
+    0% { opacity: 1; }
+    25%, 75% { opacity: .75; }
+    50% { opacity: .25; }
+    100% { opacity: 1; }
+  }
+
+  .green {
+    color: green;
+  }
+
+  .orange {
+    color: rgb(255, 115, 0);
+    animation: blink 1.5s infinite;
+  }
+
+  .red {
+    color: red;
+    animation: blink .5s infinite;
   }

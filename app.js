@@ -13,9 +13,16 @@ const attackBtn = document.getElementById('playerAttack');
 const retreatBtn = document.getElementById('playerRetreat');
 const aliens = document.querySelector('.aliens');
 const earth = document.querySelector('.earth');
+const gameProg = document.getElementById('gameProg');
 
 let playerName;
+let alienImg;
+let alien = [];
+let firstAlien;
+const player = document.createElement('h4');
+let yourShip;
 
+// menu display
 function showMenu() {
     proceedBtn.style.display = 'block';
     startOver.style.display = 'block';  
@@ -28,6 +35,7 @@ function hideMenu() {
     welcomeMsg.style.display = 'none';
 }
 
+// game interaction buttons display
 function showBtns() {
     attackBtn.style.display = 'block';
     retreatBtn.style.display = 'block';
@@ -38,16 +46,14 @@ function hideBtns() {
     retreatBtn.style.display = 'none';
 }
 
+// start button - asks for player name; if null, default name is Patchy
+// shows menu unless player clicks 'cancel'
 startBtn.addEventListener('click', function(event) {
     playerName = prompt("Enter your player name to begin.");
-
     if (playerName === '') {
-        playerName = 'Patchy';
-        showMenu();
-        startBtn.style.display = 'none';
-        welcomeMsg.innerText = `Welcome, ${playerName}! Are you ready to save the universe?`;
-        } 
-    else if (playerName) {
+        alert(`Name cannot be blank. No name, no game!`)
+    } 
+    if (playerName) {
         showMenu();
         startBtn.style.display = 'none';
         welcomeMsg.innerText = `Welcome, ${playerName}! Are you ready to save the universe?`;
@@ -64,6 +70,7 @@ startOver.addEventListener('click', function(event) {
     empty(aliens);
 })
 
+// 'prepare for battle' - hides starter menu, creates player and enemy (removes previous player stats if any)
 proceedBtn.addEventListener('click', function(event) {
     startBtn.style.display = 'none';
     hideMenu();
@@ -81,25 +88,34 @@ function empty(element) {
     element.textContent = '';
     element.innerHTML = '';
 }
-const player = document.createElement('h4');
-let yourShip;
+
 function updateShipInfo() {
-    shipInfo.textContent = `Current ship health: ${yourShip.hull}`;
+    let shipHealth = yourShip.hull;
+    let hullColor;
+    if (shipHealth >= 12) {
+        hullColor = 'green';
+    } else if (shipHealth <= 11 && shipHealth >= 6) {
+        hullColor = 'orange';
+    } else if (shipHealth < 6) {
+        hullColor = 'red';
+    }
+    
+    const shipSpan = document.createElement('span');
+    shipSpan.textContent = shipHealth;
+    shipSpan.className = hullColor;
+    shipInfo.textContent = 'Current ship health: ';
+    shipInfo.appendChild(shipSpan);
 }
+
 function createPlayer() {
     yourShip = new earthShip;
     let shipImg = document.createElement('img');
     shipImg.src = '/earthShip.png';
     earth.append(shipImg);
-    player.textContent = `All aboard the USS Assembly with Captain ${playerName} to steer us to victory!`;
+    player.textContent = `The USS Assembly has been deployed. Commander ${playerName} will steer us to victory!`;
     playerInfo.prepend(player);
     updateShipInfo();
 }
-
-let alienImg;
-
-let alien = [];
-let firstAlien;
 
 function createEnemy() {
     for (let i = 0; i < 6; i++) {
@@ -125,9 +141,9 @@ class Ship {
         let chance = Math.random();
         if (chance < this.accuracy) {
             enemy.hull -= this.firepower;
-            alert(`Successful attack!`);
+            return true;
         } else if (chance > this.accuracy) {
-            alert(`Target missed.`);
+            return false;
         };
     }
     retreat() {
@@ -136,20 +152,54 @@ class Ship {
     }
 }
 
+let gameUpdate = [];
+
+function update(text) {
+    gameUpdate.push(text);
+    // if (gameUpdate.length > 4) {
+    //     gameUpdate.shift();
+    // }
+    const msgEl = document.querySelectorAll('.msg');
+    for (let i = 0; i < msgEl.length; i++) {
+        msgEl[i].textContent = gameUpdate[i] || '';
+    }
+}
+
+function resetMsgs() {
+    gameUpdate = [];
+    const msgEl = document.querySelectorAll('.msg');
+    for (let i = 0; i < msgEl.length; i++) {
+        msgEl[i].textContent = '';
+    }
+}
+
+// initiates attack method from Ship class; if first alien (alien[0]) is defeated, remove alien from array. if first alien has remaining hull, alien will counterattack. if no aliens remaining, player wins and game restarts. if player ship hull depleted, player loses and game restarts.
 attackBtn.addEventListener('click', function (event) {
+    resetMsgs();
     firstAlien = document.querySelector('.aliens img');
-    yourShip.attack(alien[0]);
-    if (alien[0].hull <= 0) {
-        alien.shift();
-        if (firstAlien) {
+    const attack = yourShip.attack(alien[0]);
+    if (attack) {
+        update(`USS Assembly: Successful attack!`);
+        if (alien[0].hull <= 0) {
+            alien.shift();
+            if (firstAlien) {
             firstAlien.remove();
+            update(`Alien target eliminated.`)
+            }
         }
+    } else {
+        update(`USS Assembly: Target missed.`)
     }
     if (alien[0]) {
-        counterAttack();
+            if (alien[0].hull === 1) {
+                if (firstAlien) {
+                    firstAlien.classList.add('red');
+                }
+    } counterAttack();
     }
+
     if (!alien[0]) {
-        alert(`You have defeated the aliens and saved the universe!`);
+        alert(`You have defeated the aliens and saved the world!`);
         restart();
     }
     if (yourShip.hull <= 0) {
@@ -158,16 +208,17 @@ attackBtn.addEventListener('click', function (event) {
     }
 })
 
+
 function counterAttack() {
     firstAlien = document.querySelector('.aliens img');
     firstAlien.classList.add('bounce');
     let chance = Math.random();
     if (chance < alien[0].accuracy) {
-        alert('Alien counterattack: You have been hit!');
+        update('Alien counterattack: You have been hit!');
         yourShip.hull -= alien[0].firepower;
         updateShipInfo();
     } else if (chance > alien [0].accuracy) {
-        alert(`Alien counterattack unsuccessful; no damage to USS Assembly.`)
+        update(`Alien counterattack unsuccessful; no damage to USS Assembly.`)
     }
     console.log(yourShip);
     console.log(alien);
@@ -182,6 +233,7 @@ function restart() {
     empty(earth);
     empty(aliens);
     empty(player);
+    resetMsgs();
 }
 
 class earthShip extends Ship {
