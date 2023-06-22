@@ -15,11 +15,12 @@ const aliens = document.querySelector('.aliens');
 const earth = document.querySelector('.earth');
 const gameProg = document.getElementById('gameProg');
 
+const player = document.createElement('h4');
+
 let playerName;
 let alienImg;
 let alien = [];
 let firstAlien;
-const player = document.createElement('h4');
 let yourShip;
 
 // menu display
@@ -46,8 +47,6 @@ function hideBtns() {
     retreatBtn.style.display = 'none';
 }
 
-// start button - asks for player name; if null, default name is Patchy
-// shows menu unless player clicks 'cancel'
 startBtn.addEventListener('click', function(event) {
     playerName = prompt("Enter your player name to begin.");
     if (playerName === '') {
@@ -70,7 +69,6 @@ startOver.addEventListener('click', function(event) {
     empty(aliens);
 })
 
-// 'prepare for battle' - hides starter menu, creates player and enemy (removes previous player stats if any)
 proceedBtn.addEventListener('click', function(event) {
     startBtn.style.display = 'none';
     hideMenu();
@@ -156,9 +154,6 @@ let gameUpdate = [];
 
 function update(text) {
     gameUpdate.push(text);
-    // if (gameUpdate.length > 4) {
-    //     gameUpdate.shift();
-    // }
     const msgEl = document.querySelectorAll('.msg');
     for (let i = 0; i < msgEl.length; i++) {
         msgEl[i].textContent = gameUpdate[i] || '';
@@ -173,7 +168,6 @@ function resetMsgs() {
     }
 }
 
-// initiates attack method from Ship class; if first alien (alien[0]) is defeated, remove alien from array. if first alien has remaining hull, alien will counterattack. if no aliens remaining, player wins and game restarts. if player ship hull depleted, player loses and game restarts.
 attackBtn.addEventListener('click', function (event) {
     resetMsgs();
     firstAlien = document.querySelector('.aliens img');
